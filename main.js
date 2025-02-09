@@ -5,13 +5,11 @@ class CalcApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      num: 0,
-      input: '',
-      value: 0,
+      num: '',
+      input: '0',
       log: null,
       operator: null,
       term: null,
-      termFinal: null
       };
     this.numZero = this.numZero.bind(this);
     this.calculation = this.calculation.bind(this);
@@ -31,6 +29,7 @@ class CalcApp extends React.Component {
     this.numDecimal = this.numDecimal.bind(this);
     this.numEquals = this.numEquals.bind(this);
     this.numSubtract = this.numSubtract.bind(this);
+    this.numNegative = this.numNegative.bind(this);
         }
 
   numZero() {
@@ -117,7 +116,7 @@ class CalcApp extends React.Component {
   }
     numReset() {
       this.setState(state => ({
-        input: '0',
+        input: 0,
         num: 0,
         operator: null
       }));
@@ -161,18 +160,17 @@ class CalcApp extends React.Component {
       term: parseFloat(prevState.input)    
       }));
   }
-    
-    numEquals() {
-       this.setState(prevState => ({
-        input: '',
-        operator: '=',
-        log: console.log('Previous State:', prevState),
-        termFinal: parseFloat(prevState.input)   
-        }));
-    }
-                 
-          
- 
+  
+      numNegative() {
+         this.setState(prevState => ({
+      //no num
+      input: '-'+prevState.input,
+      operator: '-',
+      log: console.log('Previous State:', prevState),
+      term: parseFloat(prevState.input)    
+      }));
+  }
+     
     
     /*arrCalc(state) {
       let numIndex = this.state.num;
@@ -212,46 +210,94 @@ class CalcApp extends React.Component {
     console.log('from component prev input ' + prevState.input);
     console.log('from component prev num ' + prevState.num);
     console.log('from component ' + this.state.input);*/  
+      
   
-       
-  loadComponent() {
+  /*loadComponent(state, prevState){
+    //console.log('in loadComponent: ' + this.state.operator)
+    //console.log('in loadComponent calcValue: ' + calcValue)
+    let calcValue;
      {switch(this.state.operator) {
           case '+':
-            return this.state.term + this.state.input;
+            return calcValue = this.state.term + parseFloat(this.state.input);
             break;
           case '-':
-            return this.state.term + this.state.input;
+            return calcValue = this.state.term - parseFloat(this.state.input);
             break;
           case '*':
-            return this.state.term * this.state.input;
+            return calcValue = this.state.term * parseFloat(this.state.input);
             break;
-           case '/':
-            return this.state.term / this.state.input;
+          case '/':
+            return calcValue = this.state.term / parseFloat(this.state.input);
             break;
           default:
-            return this.state.input;
-            break;
+          return this.state.input;
+            
+         
           }
          }
-        
-  }
-  
+         console.log('in IIFE: ' + this.state.operator);
+         console.log('in IIFE calcValue: ' + calcValue);
+         return this.state.operator === '=' ? calcValue : this.state.input;
+       }; */
+   
+      numEquals(prevState, state) {
+            //console.log('in loadComponent: ' + this.state.operator)
+            //console.log('in loadComponent calcValue: ' + calcValue)
+        let calcValue;
+        {switch(this.state.operator) {
+          case '+':
+            calcValue = this.state.term + parseFloat(this.state.input);
+            break;
+          case '-':
+            calcValue = this.state.term - parseFloat(this.state.input);
+            break;
+          case '*':
+            calcValue = this.state.term * parseFloat(this.state.input);
+            break;
+          case '/':
+            calcValue = this.state.term / parseFloat(this.state.input);
+            break;
+          case '-':
+            calcValue = -1*this.state.term;
+            break;
+          default:
+            return this.state.value;
+        }
+       }
+            console.log('in numEquals: ' + this.state.operator)
+            console.log('in numEquals calcValue: ' + calcValue)
+            
+        this.setState({
+              operator: '=',
+              input: calcValue,
+              log: console.log('Previous State:', prevState),
+              });
+        }
+           
+    
   render() {
-         console.log('render called')
-         console.log('type of '+ typeof(this.state.input));
-         console.log('type of '+ typeof(this.state.term));
-          
+         //console.log('render called')
+         //console.log('type of '+ typeof(this.state.input));
+         //console.log('type of '+ typeof(this.state.term));
+         console.log('operator status '+ this.state.operator);
+         console.log('operator typeOf '+ typeof(this.state.operator));
+         
+         //If you wanted to remove leading zeroes use code below
+         let processVal = this.state.input;
+         let splitCalcValue = processVal.toString().split('');
+         console.log('splitCalcValue: ' + splitCalcValue);
+         let i = '0';
+         while(splitCalcValue[i] === '0') {
+              splitCalcValue.shift();
+           }
+         console.log('splitCalcValue after shift: ' + splitCalcValue);
+         //If you wanted to remove leading zeroes use code above
+    
+            
     return (
             <div>
               <h2>{this.state.operator}</h2>
-              
-       
-        <input value={this.loadComponent()} id='display' onChange={this.calculation} /> 
-        
-        
-       
-        
-                            
+              <table id="display"><tbody><tr><td>{this.state.input}</td></tr></tbody></table>                                 
               <table><tbody><tr><td>
              {/* <button variant="secondary" id="clear" size="lg">AC</button>
                */}
@@ -274,7 +320,9 @@ class CalcApp extends React.Component {
               <button variant="secondary" id="three" size="sm" onClick={this.numThree}>3</button>
                   </td></tr><tr><td>
               <button className="custom-btn" variant="secondary" id="clear" size="sm" onClick={this.numReset}>C</button></td><td>
-              <button className="custom-btn" variant="secondary" id="clear" size="sm" onClick={this.numEquals}>=</button></td></tr></tbody></table>
+                </td><td>
+              <button className="custom-btn" variant="secondary" id="sign" size="sm" onClick={this.numNegative}>+/-</button></td><td>
+              <button className="custom-btn" variant="secondary" id="equals" size="sm" onClick={this.numEquals}>=</button></td></tr></tbody></table>
                 <table><tbody><tr><td>
              <button className="custom-btn-op" variant="secondary" id="decimal" size="sm" onClick={this.numDecimal}>.</button>
                   </td><td>
@@ -283,9 +331,6 @@ class CalcApp extends React.Component {
               <button className="custom-btn-op" variant="secondary" id="add" size="lg" onClick={this.numAdd}>+</button></td>
                 <td><button className="custom-btn-op" variant="secondary" id="subtract" size="lg" onClick={this.numSubtract}>-</button></td>
               </tr></tbody></table>            
-              
-              {console.log(this.state.num)}
-              {console.log(this.state.input)}
                                        
             </div>
           );
@@ -371,3 +416,4 @@ function MyComponent() {
   );
 }
 */
+
